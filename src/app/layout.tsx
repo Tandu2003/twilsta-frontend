@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-
-// Import Inter font từ next/font/google với subset tiếng Việt
 import { Inter } from 'next/font/google';
 import './globals.css';
+import ReduxProvider from '@/providers/ReduxProvider';
 
 // Khởi tạo biến font Inter, dùng biến CSS để apply toàn cục
 const inter = Inter({
@@ -32,7 +31,7 @@ export default function RootLayout({
         }
         style={{ fontFamily: 'var(--font-inter), system-ui, sans-serif' }}
       >
-        {children}
+        <ReduxProvider>{children}</ReduxProvider>
       </body>
     </html>
   );
