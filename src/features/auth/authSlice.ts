@@ -1,11 +1,13 @@
 // Redux slice for authentication
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+
 import * as authService from '@/services/auth.service';
-import type { AuthState } from './types';
 import type { ApiResponse } from '@/types/api-response';
+import { AuthState, LoginDto, RegisterDto } from '@/types/auth.type';
 
 const initialState: AuthState = {
   user: null,
+  accessToken: undefined,
   status: 'idle',
   error: null,
 };
@@ -13,7 +15,7 @@ const initialState: AuthState = {
 // Async thunk for login
 export const loginThunk = createAsyncThunk(
   'auth/login',
-  async (data: { username: string; password: string }, { rejectWithValue }) => {
+  async (data: LoginDto, { rejectWithValue }) => {
     try {
       // Gọi API đăng nhập
       const result: ApiResponse = await authService.login(data);
@@ -23,20 +25,15 @@ export const loginThunk = createAsyncThunk(
       return result.data;
     } catch (error: any) {
       // Trả về lỗi
-      return rejectWithValue(
-        error.response?.data?.message || 'Đăng nhập thất bại',
-      );
+      return rejectWithValue(error.response?.data?.message || 'Đăng nhập thất bại');
     }
-  },
+  }
 );
 
 // Async thunk for register
 export const registerThunk = createAsyncThunk(
   'auth/register',
-  async (
-    data: { username: string; password: string; email: string },
-    { rejectWithValue },
-  ) => {
+  async (data: RegisterDto, { rejectWithValue }) => {
     try {
       // Gọi API đăng ký
       const result: ApiResponse = await authService.register(data);
@@ -46,30 +43,23 @@ export const registerThunk = createAsyncThunk(
       return result.data;
     } catch (error: any) {
       // Trả về lỗi
-      return rejectWithValue(
-        error.response?.data?.message || 'Đăng ký thất bại',
-      );
+      return rejectWithValue(error.response?.data?.message || 'Xảy ra lỗi khi đăng ký');
     }
-  },
+  }
 );
 
-export const logoutThunk = createAsyncThunk(
-  'auth/logout',
-  async (_, { rejectWithValue }) => {
-    try {
-      // Gọi API đăng xuất
-      const result: ApiResponse = await authService.logout();
-      if (!result.success) {
-        return rejectWithValue(result.message || 'Đăng xuất thất bại');
-      }
-      return null;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Đăng xuất thất bại',
-      );
+export const logoutThunk = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
+  try {
+    // Gọi API đăng xuất
+    const result: ApiResponse = await authService.logout();
+    if (!result.success) {
+      return rejectWithValue(result.message || 'Đăng xuất thất bại');
     }
-  },
-);
+    return result.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data?.message || 'Đăng xuất thất bại');
+  }
+});
 
 const authSlice = createSlice({
   name: 'auth',
@@ -79,24 +69,28 @@ const authSlice = createSlice({
     resetError(state) {
       state.error = null;
     },
+    setAccessToken(state, action) {
+      state.accessToken = action.payload;
+    },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
       // Login
-      .addCase(loginThunk.pending, (state) => {
+      .addCase(loginThunk.pending, state => {
         state.status = 'loading';
         state.error = null;
       })
       .addCase(loginThunk.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.user = action.payload;
+        state.accessToken = action.payload.accessToken;
       })
       .addCase(loginThunk.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload as string;
       })
       // Register
-      .addCase(registerThunk.pending, (state) => {
+      .addCase(registerThunk.pending, state => {
         state.status = 'loading';
         state.error = null;
       })
@@ -109,13 +103,14 @@ const authSlice = createSlice({
         state.error = action.payload as string;
       })
       // Logout
-      .addCase(logoutThunk.pending, (state) => {
+      .addCase(logoutThunk.pending, state => {
         state.status = 'loading';
         state.error = null;
       })
-      .addCase(logoutThunk.fulfilled, (state) => {
+      .addCase(logoutThunk.fulfilled, state => {
         state.status = 'idle';
         state.user = null;
+        state.accessToken = undefined;
       })
       .addCase(logoutThunk.rejected, (state, action) => {
         state.status = 'failed';

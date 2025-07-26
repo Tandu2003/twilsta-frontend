@@ -1,12 +1,10 @@
-// Auth feature types (Rule 30)
-
-export interface AuthState {
-  user: AuthUser | null;
+export interface UserState {
+  profile: UserProfile | null;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
-export interface AuthUser {
+export interface UserProfile {
   id: string;
   email: string;
   username: string;

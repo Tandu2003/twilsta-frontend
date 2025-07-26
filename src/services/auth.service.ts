@@ -1,29 +1,23 @@
 // Auth service: handles all API calls related to authentication
+import api from '@/lib/axios';
 import { ApiResponse } from '@/types/api-response';
-import axios from 'axios';
+import { LoginDto, RegisterDto } from '@/types/auth.type';
 
 const API_URL = '/api/auth';
 
 // Login API call
-export const login = async (data: {
-  username: string;
-  password: string;
-}): Promise<ApiResponse> => {
+export const login = async (data: LoginDto): Promise<ApiResponse> => {
   // Gửi yêu cầu đăng nhập
-  const response = await axios.post<ApiResponse>(`${API_URL}/login`, data, {
+  const response = await api.post<ApiResponse>(`${API_URL}/login`, data, {
     withCredentials: true,
   });
   return response.data;
 };
 
 // Register API call
-export const register = async (data: {
-  username: string;
-  password: string;
-  email: string;
-}): Promise<ApiResponse> => {
+export const register = async (data: RegisterDto): Promise<ApiResponse> => {
   // Gửi yêu cầu đăng ký
-  const response = await axios.post<ApiResponse>(`${API_URL}/register`, data, {
+  const response = await api.post<ApiResponse>(`${API_URL}/register`, data, {
     withCredentials: true,
   });
   return response.data;
@@ -32,10 +26,19 @@ export const register = async (data: {
 // Logout API call
 export const logout = async (): Promise<ApiResponse> => {
   // Gửi yêu cầu đăng xuất
-  const response = await axios.post<ApiResponse>(
-    `${API_URL}/logout`,
-    {},
-    { withCredentials: true },
+  const response = await api.post<ApiResponse>(`${API_URL}/logout`, {}, { withCredentials: true });
+  return response.data;
+};
+
+// Verify email API call
+export const verifyEmail = async (token: string): Promise<ApiResponse> => {
+  // Gửi yêu cầu xác thực email
+  const response = await api.post<ApiResponse>(
+    `${API_URL}/verify-email`,
+    { token },
+    {
+      withCredentials: true,
+    }
   );
   return response.data;
 };

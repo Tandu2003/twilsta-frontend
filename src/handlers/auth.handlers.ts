@@ -1,31 +1,25 @@
-// Handlers for auth logic (form submit, etc)
+import { LoginDto, RegisterDto } from '@/types/auth.type';
+
+import { loginThunk, logoutThunk, registerThunk } from '../features/auth/authSlice';
 import { AppDispatch } from '../store';
-import {
-  loginThunk,
-  registerThunk,
-  logoutThunk,
-} from '../features/auth/authSlice';
 
 // Đăng nhập
-export const handleLogin = async (
-  dispatch: AppDispatch,
-  data: { username: string; password: string },
-) => {
+export const handleLogin = async (dispatch: AppDispatch, data: LoginDto) => {
   // Gọi thunk đăng nhập
-  await dispatch(loginThunk(data));
+  const result = await dispatch(loginThunk(data));
+  return result;
 };
 
 // Đăng ký
-export const handleRegister = async (
-  dispatch: AppDispatch,
-  data: { username: string; password: string; email: string },
-) => {
+export const handleRegister = async (dispatch: AppDispatch, data: RegisterDto) => {
   // Gọi thunk đăng ký
-  await dispatch(registerThunk(data));
+  const result = await dispatch(registerThunk(data));
+  return result;
 };
 
 // Đăng xuất
 export const handleLogout = async (dispatch: AppDispatch) => {
   // Gọi thunk đăng xuất
-  await dispatch(logoutThunk());
+  const result = await dispatch(logoutThunk());
+  return result;
 };

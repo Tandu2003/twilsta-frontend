@@ -1,8 +1,9 @@
 // Redux slice for user
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+
 import * as userService from '@/services/user.service';
-import type { UserState } from '@/features/user/types';
 import type { ApiResponse } from '@/types/api-response';
+import { UserState } from '@/types/user.type';
 
 const initialState: UserState = {
   profile: null,
@@ -23,11 +24,9 @@ export const getProfileThunk = createAsyncThunk(
       return result.data;
     } catch (error: any) {
       // Trả về lỗi
-      return rejectWithValue(
-        error.response?.data?.message || 'Lấy thông tin thất bại',
-      );
+      return rejectWithValue(error.response?.data?.message || 'Lấy thông tin thất bại');
     }
-  },
+  }
 );
 
 const userSlice = createSlice({
@@ -38,10 +37,10 @@ const userSlice = createSlice({
       state.error = null;
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
       // Get profile
-      .addCase(getProfileThunk.pending, (state) => {
+      .addCase(getProfileThunk.pending, state => {
         state.status = 'loading';
         state.error = null;
       })
@@ -53,7 +52,6 @@ const userSlice = createSlice({
         state.status = 'failed';
         state.error = action.payload as string;
       });
-    // ...existing code...
   },
 });
 

@@ -1,12 +1,11 @@
-// User feature types (Rule 30)
-
-export interface UserState {
-  profile: UserProfile | null;
+export interface AuthState {
+  user: AuthUser | null;
+  accessToken?: string;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
-export interface UserProfile {
+export interface AuthUser {
   id: string;
   email: string;
   username: string;
@@ -19,4 +18,15 @@ export interface UserProfile {
   lastLoginAt?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface LoginDto {
+  email: string;
+  password: string;
+}
+
+export interface RegisterDto {
+  email: string;
+  password: string;
+  username: string;
 }
