@@ -30,6 +30,17 @@ export const logout = async (): Promise<ApiResponse> => {
   return response.data;
 };
 
+// Force logout API call (không cần accessToken)
+export const forceLogout = async (): Promise<ApiResponse> => {
+  // Gửi yêu cầu force logout
+  const response = await api.post<ApiResponse>(
+    `${API_URL}/force-logout`,
+    {},
+    { withCredentials: true }
+  );
+  return response.data;
+};
+
 // Verify email API call
 export const verifyEmail = async (token: string): Promise<ApiResponse> => {
   // Gửi yêu cầu xác thực email

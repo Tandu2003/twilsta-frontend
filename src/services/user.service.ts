@@ -1,13 +1,17 @@
 // User service: handles all API calls related to user
-import api from '@/lib/axios';
+import { AxiosRequestConfig, AxiosResponse } from 'axios';
+
 import type { ApiResponse } from '@/types/api-response';
 
-const API_URL = '/api/user';
-
 // Lấy thông tin user hiện tại (đã xác thực)
-export const getProfile = async (): Promise<ApiResponse> => {
-  // Gọi API đúng với backend: /user/me
-  const response = await api.get<ApiResponse>(`${API_URL}/me`, {
+// Sử dụng callApi từ useApiWithRefresh để tự động refresh token khi cần
+export const getProfile = async (
+  callApi: (config: AxiosRequestConfig) => Promise<AxiosResponse>
+): Promise<ApiResponse> => {
+  // Gọi API qua callApi để tự động refresh token nếu cần
+  const response = await callApi({
+    url: '/api/user/me',
+    method: 'GET',
     withCredentials: true,
   });
   return response.data;

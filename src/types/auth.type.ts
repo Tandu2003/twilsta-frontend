@@ -29,4 +29,26 @@ export interface RegisterDto {
   email: string;
   password: string;
   username: string;
+  displayName: string;
 }
+
+// Type cho dữ liệu form đăng nhập
+export interface LoginFormData {
+  email: string;
+  password: string;
+}
+
+// Type cho lỗi form đăng nhập
+export type LoginFormError = Partial<Record<keyof LoginFormData, string>>;
+
+// Type cho dữ liệu form đăng ký
+export interface RegisterFormData {
+  username: string;
+  displayName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+
+// Type cho lỗi form đăng ký
+export type RegisterFormError = Partial<Record<keyof RegisterFormData, string>>;

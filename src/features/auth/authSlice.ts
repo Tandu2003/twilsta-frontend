@@ -1,9 +1,11 @@
 // Redux slice for authentication
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
+// Import user slice actions để clear profile
+import { resetError as resetUserError } from '@/features/user/userSlice';
 import * as authService from '@/services/auth.service';
-import type { ApiResponse } from '@/types/api-response';
-import { AuthState, LoginDto, RegisterDto } from '@/types/auth.type';
+import type { ApiResponse, AxiosErrorResponse } from '@/types/api-response';
+import { AuthState, AuthUser, LoginDto, RegisterDto } from '@/types/auth.type';
 
 const initialState: AuthState = {
   user: null,
@@ -23,9 +25,10 @@ export const loginThunk = createAsyncThunk(
         return rejectWithValue(result.message || 'Đăng nhập thất bại');
       }
       return result.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const axiosError = error as AxiosErrorResponse;
       // Trả về lỗi
-      return rejectWithValue(error.response?.data?.message || 'Đăng nhập thất bại');
+      return rejectWithValue(axiosError.response?.data?.message || 'Đăng nhập thất bại');
     }
   }
 );
@@ -41,9 +44,10 @@ export const registerThunk = createAsyncThunk(
         return rejectWithValue(result.message || 'Đăng ký thất bại');
       }
       return result.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const axiosError = error as AxiosErrorResponse;
       // Trả về lỗi
-      return rejectWithValue(error.response?.data?.message || 'Xảy ra lỗi khi đăng ký');
+      return rejectWithValue(axiosError.response?.data?.message || 'Xảy ra lỗi khi đăng ký');
     }
   }
 );
@@ -56,8 +60,9 @@ export const logoutThunk = createAsyncThunk('auth/logout', async (_, { rejectWit
       return rejectWithValue(result.message || 'Đăng xuất thất bại');
     }
     return result.data;
-  } catch (error: any) {
-    return rejectWithValue(error.response?.data?.message || 'Đăng xuất thất bại');
+  } catch (error: unknown) {
+    const axiosError = error as AxiosErrorResponse;
+    return rejectWithValue(axiosError.response?.data?.message || 'Đăng xuất thất bại');
   }
 });
 
@@ -82,8 +87,9 @@ const authSlice = createSlice({
       })
       .addCase(loginThunk.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.user = action.payload;
-        state.accessToken = action.payload.accessToken;
+        const payload = action.payload as AuthUser & { accessToken: string };
+        state.user = payload;
+        state.accessToken = payload.accessToken;
       })
       .addCase(loginThunk.rejected, (state, action) => {
         state.status = 'failed';
@@ -96,7 +102,7 @@ const authSlice = createSlice({
       })
       .addCase(registerThunk.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.user = action.payload;
+        state.user = action.payload as AuthUser;
       })
       .addCase(registerThunk.rejected, (state, action) => {
         state.status = 'failed';
@@ -113,11 +119,15 @@ const authSlice = createSlice({
         state.accessToken = undefined;
       })
       .addCase(logoutThunk.rejected, (state, action) => {
-        state.status = 'failed';
+        // Luôn clear state khi logout, kể cả khi có lỗi
+        // vì mục đích chính là đăng xuất user
+        state.status = 'idle';
+        state.user = null;
+        state.accessToken = undefined;
         state.error = action.payload as string;
       });
   },
 });
 
-export const { resetError } = authSlice.actions;
+export const { resetError, setAccessToken } = authSlice.actions;
 export default authSlice.reducer;
